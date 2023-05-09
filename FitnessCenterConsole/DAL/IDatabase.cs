@@ -5,7 +5,7 @@ using FitnessCenterConsole.Entities;
 namespace FitnessCenterConsole.DAL {
     interface IDatabase {
         public bool AddNewCoach(string surname, string name, string middleName, int experience,
-            Education education, int age, DateTime birthday, string phoneNumber);
+            Education education, DateTime birthday, string phoneNumber);
         public bool AddNewClient(string surname, string name, string middleName, 
             DateTime birthday, string phoneNumber);
         public bool AddNewGym(int numberOfGym, TypeOfGym typeOfGym);
@@ -13,18 +13,19 @@ namespace FitnessCenterConsole.DAL {
             string surnameCoach, string phoneNumberCoach, DateTime dateTime);
         public bool DeleteClientFromTraining(string surnameClient, string phoneNumberClient,
             string surnameCoach, string phoneNumberCoach, DateTime dateTime);
-        public bool AddNewTraining(int gymKey, SearchElement coachKey, 
+        public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, 
             HashSet<SearchElement> clientKeys, DateTime dateTime);
-        public bool AddNewTraining(int gymKey, SearchElement coachKey, DateTime dateTime);
+        public bool AddNewTraining(int gymKey, string surnameCoach, 
+            string phoneNumberCoach, DateTime dateTime);
         public bool DeleteTraining(int gymKey, DateTime dateTime);
-        public string GetInfoCoach(SearchElement searchElement);
+        public string GetInfoCoach(string surname, string phoneNumber);
         public string GetInfoGym(int numberOfGym);
-        public string GetInfoClient(SearchElement searchElement);
-        public bool DeleteCoach(SearchElement searchElement);
-        public bool DeleteClient(SearchElement searchElement);
+        public string GetInfoClient(string surname, string phoneNumber);
+        public bool DeleteCoach(string surname, string phoneNumber);
+        public bool DeleteClient(string surname, string phoneNumber);
         public bool DeleteGym(int numberOfGym);
-        public string FindTrainingCoach(SearchElement searchElement, DateTime dateTime);
-        public string FindTrainingClient(SearchElement searchElement, DateTime dateTime);
+        public string FindTrainingCoach(string surname, string phoneNumber, DateTime dateTime);
+        public string FindTrainingClient(string surname, string phoneNumber, DateTime dateTime);
         public string FindTrainingGym(int numberOfGym, DateTime dateTime);
     }
 }

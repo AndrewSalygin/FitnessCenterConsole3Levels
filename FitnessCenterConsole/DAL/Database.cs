@@ -40,7 +40,7 @@ namespace FitnessCenterConsole.DAL {
 
         // добавление сущностей
         public bool AddNewCoach(string surname, string name, string middleName, int experience, 
-            Education education, int age, DateTime birthday, string phoneNumber) {
+            Education education, DateTime birthday, string phoneNumber) {
             Coach temp;
             try {
                 temp = new Coach(Coaches.Count, surname, name, middleName, experience, education, birthday, phoneNumber);
@@ -51,7 +51,7 @@ namespace FitnessCenterConsole.DAL {
             try {
                 Coaches.Add(new SearchElement(surname, phoneNumber), temp);
             } catch (ArgumentException ex) {
-                PrintToApp($"Ошибка: добавление тренера {surname} с уже существующей фамилией в базе.");
+                PrintToApp($"Ошибка: добавление тренера {surname} с уже существующим номером в базе.");
                 return false;
             }
             return true;
@@ -68,7 +68,7 @@ namespace FitnessCenterConsole.DAL {
             try {
                 Clients.Add(new SearchElement(surname, phoneNumber), temp);
             } catch (ArgumentException ex) {
-                PrintToApp($"Ошибка: добавление клиента {surname} с уже существующей фамилией в базе.");
+                PrintToApp($"Ошибка: добавление клиента {surname} с уже существующим номером в базе.");
                 return false;
             }
 
@@ -165,7 +165,8 @@ namespace FitnessCenterConsole.DAL {
 
         // обертка для класса Schedule
         // реализуем полиморфизм, так как информация на этапе планирования расписания может отсутствовать
-        public bool AddNewTraining(int gymKey, SearchElement coachKey, HashSet<SearchElement> clientKeys, DateTime dateTime) {
+        public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, HashSet<SearchElement> clientKeys, DateTime dateTime) {
+            SearchElement coachKey = new SearchElement(surnameCoach, phoneNumberCoach);
             try {
                 // если указанный зал существует
                 if (GetGymByNumber(gymKey) != null) {
@@ -188,13 +189,26 @@ namespace FitnessCenterConsole.DAL {
             }
         }
 
-        public bool AddNewTraining(int gymKey, SearchElement coachKey, DateTime dateTime) {
+        public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, DateTime dateTime) {
+            SearchElement coachKey = new SearchElement(surnameCoach, phoneNumberCoach);
             try {
                 if (GetGymByNumber(gymKey) != null) {
                     if (GetCoachBySearchElement(coachKey) != null) {
                         return Schedule.AddTraining(gymKey, coachKey, dateTime);
                     }
                     throw new WrongValueException($"Ошибка: тренер {coachKey} в базе не найден.");
+                }
+                throw new WrongValueException($"Ошибка: зал номер {gymKey} в базе не найден.");
+            } catch (WrongValueException ex) {
+                PrintToApp(ex.Message);
+                return false;
+            }
+        }
+
+        public bool AddNewTraining(int gymKey, DateTime dateTime) {
+            try {
+                if (GetGymByNumber(gymKey) != null) {
+                    return Schedule.AddTraining(gymKey, dateTime);
                 }
                 throw new WrongValueException($"Ошибка: зал номер {gymKey} в базе не найден.");
             } catch (WrongValueException ex) {
@@ -213,7 +227,8 @@ namespace FitnessCenterConsole.DAL {
         }
 
         // вывод полной информации о сущностях с актуальным \ архивным расписанием 
-        public string GetInfoCoach (SearchElement searchElement) {
+        public string GetInfoCoach (string surname, string phoneNumber) {
+            SearchElement searchElement = new SearchElement(surname, phoneNumber);
             Coach temp = GetCoachBySearchElement(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null ? "\nНайдено:" +
@@ -231,7 +246,8 @@ namespace FitnessCenterConsole.DAL {
                    localSchedule.ToString() : $"Ошибка: зала номер {numberOfGym} не найдено в базе.";
         }
 
-        public string GetInfoClient (SearchElement searchElement) {
+        public string GetInfoClient (string surname, string phoneNumber) {
+            SearchElement searchElement = new SearchElement(surname, phoneNumber);
             Client temp = GetClientBySearchElement(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null ? "\nНайдено:" +
@@ -253,10 +269,11 @@ namespace FitnessCenterConsole.DAL {
         }
 
         // удаление сущностей
-        public bool DeleteCoach(SearchElement searchElement) {
-           try { 
-                if (!Coaches.Remove(searchElement)) {
-                    throw new WrongValueException($"Ошибка: тренера {searchElement.Surname} не найдено в базе.");
+        public bool DeleteCoach(string surname, string phoneNumber) {
+            SearchElement temp = new SearchElement(surname, phoneNumber);
+            try { 
+                if (!Coaches.Remove(temp)) {
+                    throw new WrongValueException($"Ошибка: тренера {temp.Surname} не найдено в базе.");
                 } 
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
@@ -266,10 +283,12 @@ namespace FitnessCenterConsole.DAL {
             return true;
         }
 
-        public bool DeleteClient(SearchElement searchElement) {
+        public bool DeleteClient(string surname, string phoneNumber) {
+            SearchElement temp = new SearchElement(surname, phoneNumber);
+            bool client = Clients.ContainsKey(temp);
             try { 
-                if (!Clients.Remove(searchElement)) {
-                    throw new WrongValueException($"Ошибка: клиента {searchElement.Surname} не найдено в базе.");
+                if (!Clients.Remove(temp)) {
+                    throw new WrongValueException($"Ошибка: клиента {temp.Surname} не найдено в базе.");
                 } 
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
@@ -292,14 +311,16 @@ namespace FitnessCenterConsole.DAL {
         }
 
         // поиск по дате и времени для клиента/тренера, занятость зала
-        public string FindTrainingCoach(SearchElement searchElement, DateTime dateTime) {
+        public string FindTrainingCoach(string surname, string phoneNumber, DateTime dateTime) {
+            SearchElement searchElement = new SearchElement(surname, phoneNumber);
             Schedule.Training training = Schedule.GetTrainingCoach(searchElement, dateTime);
             if (training != null) {
                 return training.stringForCoach();                    
             }
             return "Таких записей нет.";
         }
-        public string FindTrainingClient(SearchElement searchElement, DateTime dateTime) {
+        public string FindTrainingClient(string surname, string phoneNumber, DateTime dateTime) {
+            SearchElement searchElement = new SearchElement(surname, phoneNumber);
             Schedule.Training training = Schedule.GetTrainingClient(searchElement, dateTime);
             if (training != null) {
                 return training.stringForClient();
