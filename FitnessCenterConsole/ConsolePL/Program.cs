@@ -39,6 +39,7 @@ namespace FitnessCenterConsole.ConsolePL {
             }
 
             database.AddNewClient("Иванов", "Михаил", "Сергеевич", new DateTime(1997, 2, 23), "75555555555");
+            database.AddNewClient("Иванов", "Михаил", "Сергеевич", new DateTime(1997, 2, 23), "70000000000");
             database.AddNewClient("Борисова", "Елизавета", "Егоровна", new DateTime(1996, 3, 22), "74444444444");
             database.AddNewClient("Сергеев", "Алексей", "Маркович", new DateTime(1999, 6, 25), "74444444441");
             database.AddNewClient("Черных", "Александр", "Данилович", new DateTime(1995, 2, 6), "74444444442");
@@ -74,17 +75,17 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<KeyValuePair<string, string>> clients = new HashSet<KeyValuePair<string, string>>();
-            clients.Add(new KeyValuePair<string, string>("Борисова", "74444444444"));
-            clients.Add(new KeyValuePair<string, string>("Борисова222", "74444444444"));
-            clients.Add(new KeyValuePair<string, string>("Черных", "74444444442"));
+            HashSet<string> clients = new HashSet<string>();
+            clients.Add(new string("Борисова_74444444444"));
+            clients.Add(new string("Борисова222_74444444444"));
+            clients.Add(new string("Черных_74444444442"));
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new KeyValuePair<string, string>("Борисова222", "74444444444"));
+            clients.Remove("Борисова222_74444444444");
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new KeyValuePair<string, string>("Борисова", "74444444444"));            
+            clients.Remove(new string("Борисова_74444444444"));            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
@@ -96,13 +97,10 @@ namespace FitnessCenterConsole.ConsolePL {
             Console.WriteLine(database.FindTrainingClient("Черных", "74444444443", time1));
 
             // сохранение файла
-            using (FileStream fs = new FileStream("database_new.json", FileMode.OpenOrCreate)) {
-                TypeDescriptor.AddAttributes(typeof((string, string)), new TypeConverterAttribute(typeof(KeyValuePair<string, string>)));
-                var json = JsonConvert.SerializeObject(database);
-                JsonConvert.DeserializeObject<Database>(json);
-                //        JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
+            using (FileStream fs = new FileStream("database_new.json", FileMode.Create)) {
+                System.Text.Json.JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
             }
-        
+
         }
     }
 }

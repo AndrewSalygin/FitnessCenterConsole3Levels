@@ -9,16 +9,16 @@ namespace FitnessCenterConsole.Entities {
         public class Training : IComparable<Training> {
             private DateTime _dateTime;
             private int _gymKey;
-            private KeyValuePair<string, string> _coachKey;
-            private HashSet<KeyValuePair<string, string>> _clientKeys;
+            private string _coachKey;
+            private HashSet<string> _clientKeys;
             private int _countOfClients;
 
             [JsonConstructor]
-            public Training(int gymKey, DateTime dateTime, KeyValuePair<string, string> coachKey = default, HashSet<KeyValuePair<string, string>> clientKeys = null) {
+            public Training(int gymKey, DateTime dateTime, string coachKey = default, HashSet<string> clientKeys = null) {
                 DateTime = dateTime;
                 GymKey = gymKey;
                 if (coachKey.Equals(default)) {
-                    CoachKey = new KeyValuePair<string, string>("отсутствует", "отсутствует");
+                    CoachKey = new string("отсутствует" + '_' + "отсутствует");
                 } else {
                     CoachKey = coachKey;
                 }
@@ -30,7 +30,7 @@ namespace FitnessCenterConsole.Entities {
                         CountOfClients = clientKeys.Count();
                     ClientKeys = clientKeys;
                 } else {
-                    ClientKeys = new HashSet<KeyValuePair<string, string>>();
+                    ClientKeys = new HashSet<string>();
                 }
             }
 
@@ -38,12 +38,12 @@ namespace FitnessCenterConsole.Entities {
                 string result = "\n--------------------\n" +
                                 $"Дата: {DateTime.ToShortDateString()} \n" +
                                 $"Время: {DateTime.ToLongTimeString()} \n" +
-                                $"Тренер: {CoachKey.Key}\n" +
+                                $"Тренер: {CoachKey.Split('_')[0]}\n" +
                                 $"Номер зала: {GymKey} \n" +
                                 $"Количество клиентов: {CountOfClients} \n\n" +
                                 $"Клиенты: \n";
-                foreach (KeyValuePair<string, string> client in ClientKeys) {
-                    result += $"{client.Key} \n";
+                foreach (string client in ClientKeys) {
+                    result += $"{client.Split('_')[0]} \n";
                 }
                 result += "--------------------\n\n";
                 return result;
@@ -54,7 +54,7 @@ namespace FitnessCenterConsole.Entities {
                                 $"Дата: {DateTime.ToShortDateString()} \n" +
                                 $"Время: {DateTime.ToLongTimeString()} \n" +
                                 $"Номер зала: {GymKey} \n" +
-                                $"Тренер: {CoachKey.Key} \n";
+                                $"Тренер: {CoachKey.Split('_')[0]} \n";
                 result += "--------------------\n\n";
                 return result;
             }
@@ -66,8 +66,8 @@ namespace FitnessCenterConsole.Entities {
                                 $"Номер зала: {GymKey} \n" +
                                 $"Количество клиентов: {CountOfClients} \n\n" +
                                 $"Клиенты: \n";
-                foreach (KeyValuePair<string, string> client in ClientKeys) {
-                    result += $"{client.Key} \n";
+                foreach (string client in ClientKeys) {
+                    result += $"{client.Split('_')[0]} \n";
                 }
                 result += "--------------------\n\n";
                 return result;
@@ -79,8 +79,8 @@ namespace FitnessCenterConsole.Entities {
 
             public DateTime DateTime { get => _dateTime; set => _dateTime = value; }
             public int GymKey { get => _gymKey; set => _gymKey = value; }
-            public KeyValuePair<string, string> CoachKey { get => _coachKey; set => _coachKey = value; }
-            public HashSet<KeyValuePair<string, string>> ClientKeys { get => _clientKeys; set => _clientKeys = value; }
+            public string CoachKey { get => _coachKey; set => _coachKey = value; }
+            public HashSet<string> ClientKeys { get => _clientKeys; set => _clientKeys = value; }
             public int CountOfClients { get => _countOfClients; set => _countOfClients = value; }
         }
 
@@ -136,7 +136,7 @@ namespace FitnessCenterConsole.Entities {
             Console.WriteLine(text);
         }
         
-        internal bool AddTraining(int gymKey, KeyValuePair<string, string> coachKey, HashSet<KeyValuePair<string, string>> clientKeys, DateTime dateTime) {
+        internal bool AddTraining(int gymKey, string coachKey, HashSet<string> clientKeys, DateTime dateTime) {
             Training temp;
             DateTime largeBorderTime = dateTime.AddHours(1);
             DateTime smallerBorderTime;
@@ -151,15 +151,15 @@ namespace FitnessCenterConsole.Entities {
             try {
                 foreach (Training training in Trainings) {
                     if (smallerBorderTime < training.DateTime && training.DateTime < largeBorderTime) {
-                        if (training.CoachKey.Value == coachKey.Value) {
-                            throw new WrongValueException($"Ошибка: тренер {coachKey.Key} уже проводит тренеровку в данное время.");
+                        if (training.CoachKey.Split('_')[1] == coachKey.Split('_')[1]) {
+                            throw new WrongValueException($"Ошибка: тренер {coachKey.Split('_')[0]} уже проводит тренеровку в данное время.");
                         }
                         if (gymKey == training.GymKey) {
                             throw new WrongValueException($"Ошибка: зал номер {gymKey} уже занят в данное время.");
                         }
-                        foreach (KeyValuePair<string, string> client in clientKeys) {
+                        foreach (string client in clientKeys) {
                             if (training.ClientKeys.Contains(client)) {
-                                throw new WrongValueException($"Ошибка: клиент {client.Key} уже записан на другую тренировку в это время.");
+                                throw new WrongValueException($"Ошибка: клиент {client.Split('_')[0]} уже записан на другую тренировку в это время.");
                             }
                         }
                     }
@@ -174,7 +174,7 @@ namespace FitnessCenterConsole.Entities {
             return true;
         }
 
-        internal bool AddTraining(int gymKey, KeyValuePair<string, string> coachKey, DateTime dateTime) {
+        internal bool AddTraining(int gymKey, string coachKey, DateTime dateTime) {
             Training temp;
             DateTime largeBorderTime = dateTime.AddHours(1);
             DateTime smallerBorderTime;
@@ -189,8 +189,8 @@ namespace FitnessCenterConsole.Entities {
             try {
                 foreach (Training training in Trainings) {
                     if (smallerBorderTime < training.DateTime && training.DateTime < largeBorderTime) {
-                        if (training.CoachKey.Value == coachKey.Value) {
-                            throw new WrongValueException($"Ошибка: тренер {coachKey.Key} уже проводит тренеровку в данное время.");
+                        if (training.CoachKey.Split('_')[1] == coachKey.Split('_')[1]) {
+                            throw new WrongValueException($"Ошибка: тренер {coachKey.Split('_')[0]} уже проводит тренеровку в данное время.");
                         }
                         if (gymKey == training.GymKey) {
                             throw new WrongValueException($"Ошибка: зал номер {gymKey} уже занят в данное время.");
@@ -247,16 +247,16 @@ namespace FitnessCenterConsole.Entities {
             return true;
         }
 
-        internal Training GetTrainingCoach(KeyValuePair<string, string> searchElement, DateTime dateTime) {
+        internal Training GetTrainingCoach(string searchElement, DateTime dateTime) {
             return Trainings.FirstOrDefault(x => x.CoachKey.Equals(searchElement) &&
                                             x.DateTime <= dateTime &&
                                             x.DateTime.AddHours(1) >= dateTime);
         }
 
-        internal Training GetTrainingClient(KeyValuePair<string, string> searchElement, DateTime dateTime) {
+        internal Training GetTrainingClient(string searchElement, DateTime dateTime) {
             foreach (Training training in Trainings) {
-                foreach (KeyValuePair<string, string> client in training.ClientKeys) {
-                    if (searchElement.Value == client.Value &&
+                foreach (string client in training.ClientKeys) {
+                    if (searchElement.Split('_')[1] == client.Split('_')[1] &&
                         dateTime >= training.DateTime &&
                         dateTime <= training.DateTime.AddHours(1)) {
                         return training;
@@ -280,7 +280,7 @@ namespace FitnessCenterConsole.Entities {
             if (client != null) {
                 SortedSet<Training> trainings = new SortedSet<Training>();
                 foreach (Training training in Trainings) {
-                    if (training.ClientKeys.Contains(new KeyValuePair<string, string>(client.Surname, client.PhoneNumber))) {
+                    if (training.ClientKeys.Contains(new string(client.Surname + '_' + client.PhoneNumber))) {
                         trainings.Add(training);
                     }
                 }
@@ -308,7 +308,7 @@ namespace FitnessCenterConsole.Entities {
             if (coach != null) {
                 SortedSet<Training> trainings = new SortedSet<Training>();
                 foreach (Training training in Trainings) {
-                    if (training.CoachKey.Value == coach.PhoneNumber) {
+                    if (training.CoachKey.Split('_')[1] == coach.PhoneNumber) {
                         trainings.Add(training);
                     }
                 }
