@@ -4,6 +4,10 @@ using System.IO;
 using System.Text.Json;
 using FitnessCenterConsole.Entities;
 using FitnessCenterConsole.DAL;
+using FitnessCenterConsole.Common;
+using System.ComponentModel;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace FitnessCenterConsole.ConsolePL {
     class Program {
@@ -94,7 +98,12 @@ namespace FitnessCenterConsole.ConsolePL {
 
             // сохранение файла
             using (FileStream fs = new FileStream("database_new.json", FileMode.OpenOrCreate)) {
-                    JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
+                TypeDescriptor.AddAttributes(typeof((string, string)), new TypeConverterAttribute(typeof(TupleConverter<string, string>)));
+                var json = JsonConvert.SerializeObject(database);
+                byte[] info = new UTF8Encoding(true).GetBytes(json);
+                fs.Write(info, 0, info.Length);
+                //               
+                //JsonSerializer.SerializeAsync<Database>(fs, database);
             }
         
         }
