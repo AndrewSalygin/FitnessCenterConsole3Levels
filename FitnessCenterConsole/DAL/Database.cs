@@ -6,27 +6,27 @@ using FitnessCenterConsole.Entities;
 
 namespace FitnessCenterConsole.DAL {
     internal class Database : IDatabase {
-        private Dictionary<KeyValuePair<string, string>, Coach> _coaches;
-        private Dictionary<KeyValuePair<string, string>, Client> _clients;
+        private Dictionary<string, Coach> _coaches;
+        private Dictionary<string, Client> _clients;
         private Dictionary<int, Gym> _gyms;
         private Schedule _schedule;
 
-        public Dictionary<KeyValuePair<string, string>, Coach> Coaches { get => _coaches; set => _coaches = value; }
-        public Dictionary<KeyValuePair<string, string>, Client> Clients { get => _clients; set => _clients = value; }
+        public Dictionary<string, Coach> Coaches { get => _coaches; set => _coaches = value; }
+        public Dictionary<string, Client> Clients { get => _clients; set => _clients = value; }
         public Dictionary<int, Gym> Gyms { get => _gyms; set => _gyms = value; }
         public Schedule Schedule { get => _schedule; set => _schedule = value; }
 
         // конструктор для новой базы
         internal Database() {
-            _coaches = new Dictionary<KeyValuePair<string, string>, Coach>();
-            _clients = new Dictionary<KeyValuePair<string, string>, Client>();
+            _coaches = new Dictionary<string, Coach>();
+            _clients = new Dictionary<string, Client>();
             _gyms = new Dictionary<int, Gym>();
             _schedule = new Schedule();
         }
 
         [JsonConstructor]
         // конструктор для json
-        public Database(Dictionary<KeyValuePair<string, string>, Coach> coaches, Dictionary<KeyValuePair<string, string>, Client> clients, Dictionary<int, Gym> gyms, Schedule schedule) {
+        public Database(Dictionary<string, Coach> coaches, Dictionary<string, Client> clients, Dictionary<int, Gym> gyms, Schedule schedule) {
             _coaches = coaches;
             _clients = clients;
             _gyms = gyms;
@@ -49,7 +49,7 @@ namespace FitnessCenterConsole.DAL {
                 return false;
             }
             try {
-                Coaches.Add(new KeyValuePair<string, string>(surname, phoneNumber), temp);
+                Coaches.Add(surname + '_' + phoneNumber, temp);
             } catch (ArgumentException ex) {
                 PrintToApp($"Ошибка: добавление тренера {surname} с уже существующим номером в базе.");
                 return false;
@@ -66,7 +66,7 @@ namespace FitnessCenterConsole.DAL {
                 return false;
             }
             try {
-                Clients.Add(new KeyValuePair<string, string>(surname, phoneNumber), temp);
+                Clients.Add(surname + '_' + phoneNumber, temp);
             } catch (ArgumentException ex) {
                 PrintToApp($"Ошибка: добавление клиента {surname} с уже существующим номером в базе.");
                 return false;
@@ -94,9 +94,9 @@ namespace FitnessCenterConsole.DAL {
         // добавление клиентов в занятие
         public bool AddClientToTraining(string surnameClient, string phoneNumberClient, 
             string surnameCoach, string phoneNumberCoach, DateTime dateTime) {
-            KeyValuePair<string, string> searchElementCoach = new KeyValuePair<string, string>(surnameCoach, phoneNumberCoach);
+            string searchElementCoach = new string(surnameCoach + '_' + phoneNumberCoach);
             Schedule.Training training = Schedule.GetTrainingCoach(searchElementCoach, dateTime);
-            KeyValuePair<string, string> searchElementClient = new KeyValuePair<string, string>(surnameClient, phoneNumberClient);
+            string searchElementClient = new string(surnameClient + '_' + phoneNumberClient);
             // если тренеровка, в которую необходимо добавить клиента существует
             try {
                 if (training != null) {
@@ -136,9 +136,9 @@ namespace FitnessCenterConsole.DAL {
         // удаление клиентов из занятия
         public bool DeleteClientFromTraining(string surnameClient, string phoneNumberClient,
             string surnameCoach, string phoneNumberCoach, DateTime dateTime) {
-            KeyValuePair<string, string> searchElementCoach = new KeyValuePair<string, string>(surnameCoach, phoneNumberCoach);
+            string searchElementCoach = new string(surnameCoach + '_' + phoneNumberCoach);
             Schedule.Training training = Schedule.GetTrainingCoach(searchElementCoach, dateTime);
-            KeyValuePair<string, string> searchElementClient = new KeyValuePair<string, string>(surnameClient, phoneNumberClient);
+            string searchElementClient = new string(surnameClient + '_' + phoneNumberClient);
             try {
                 // если тренеровка, в которую необходимо добавить клиента существует
                 if (training != null) {
@@ -165,22 +165,22 @@ namespace FitnessCenterConsole.DAL {
 
         // обертка для класса Schedule
         // реализуем полиморфизм, так как информация на этапе планирования расписания может отсутствовать
-        public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, HashSet<KeyValuePair<string, string>> clientKeys, DateTime dateTime) {
-            KeyValuePair<string, string> coachKey = new KeyValuePair<string, string>(surnameCoach, phoneNumberCoach);
+        public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, HashSet<string> clientKeys, DateTime dateTime) {
+            string coachKey = new string(surnameCoach + '_' + phoneNumberCoach);
             try {
                 // если указанный зал существует
                 if (GetGymByNumber(gymKey) != null) {
                     // если указанный тренер существует
                     if (GetCoachByTuple(coachKey) != null) {
                         // если все клиенты в базе существуют
-                        foreach (KeyValuePair<string, string> client in clientKeys) {
+                        foreach (string client in clientKeys) {
                             if (GetClientByTuple(client) == null) {
-                                throw new WrongValueException($"Ошибка: клиент {client.Key} не найден в базе.");
+                                throw new WrongValueException($"Ошибка: клиент {client.Split('_')[0]} не найден в базе.");
                             }
                         }
                         return Schedule.AddTraining(gymKey, coachKey, clientKeys, dateTime);
                     }
-                    throw new WrongValueException($"Ошибка: тренер {coachKey.Key} в базе не найден.");
+                    throw new WrongValueException($"Ошибка: тренер {coachKey.Split('_')[0]} в базе не найден.");
                 }
                 throw new WrongValueException($"Ошибка: зал номер {gymKey} в базе не найден.");                
             } catch (WrongValueException ex) {
@@ -190,13 +190,13 @@ namespace FitnessCenterConsole.DAL {
         }
 
         public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, DateTime dateTime) {
-            KeyValuePair<string, string> coachKey = new KeyValuePair<string, string>(surnameCoach, phoneNumberCoach);
+            string coachKey = new string(surnameCoach + '_' + phoneNumberCoach);
             try {
                 if (GetGymByNumber(gymKey) != null) {
                     if (GetCoachByTuple(coachKey) != null) {
                         return Schedule.AddTraining(gymKey, coachKey, dateTime);
                     }
-                    throw new WrongValueException($"Ошибка: тренер {coachKey.Key} в базе не найден.");
+                    throw new WrongValueException($"Ошибка: тренер {coachKey.Split('_')[0]} в базе не найден.");
                 }
                 throw new WrongValueException($"Ошибка: зал номер {gymKey} в базе не найден.");
             } catch (WrongValueException ex) {
@@ -228,13 +228,13 @@ namespace FitnessCenterConsole.DAL {
 
         // вывод полной информации о сущностях с актуальным \ архивным расписанием 
         public string GetInfoCoach (string surname, string phoneNumber) {
-            KeyValuePair<string, string> searchElement = new KeyValuePair<string, string>(surname, phoneNumber);
+            string searchElement = new string(surname + '_' + phoneNumber);
             Coach temp = GetCoachByTuple(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null ? "\nНайдено:" +
                    "\n--------------------\n" +
                    temp.ToString() +
-                   localSchedule.stringScheduleCoach() : $"Ошибка: тренера {searchElement.Key} не найдено в базе.";
+                   localSchedule.stringScheduleCoach() : $"Ошибка: тренера {searchElement.Split('_')[0]} не найдено в базе.";
         }
 
         public string GetInfoGym (int numberOfGym) {
@@ -247,21 +247,21 @@ namespace FitnessCenterConsole.DAL {
         }
 
         public string GetInfoClient (string surname, string phoneNumber) {
-            KeyValuePair<string, string> searchElement = new KeyValuePair<string, string>(surname, phoneNumber);
+            string searchElement = new string(surname + '_' + phoneNumber);
             Client temp = GetClientByTuple(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null ? "\nНайдено:" +
                    "\n--------------------\n" +
                    temp.ToString() +
-                   localSchedule.stringScheduleClient() : $"Ошибка: клиента {searchElement.Key} не найдено в базе.";
+                   localSchedule.stringScheduleClient() : $"Ошибка: клиента {searchElement.Split('_')[0]} не найдено в базе.";
         }
 
         // получение экземпляра класса
-        private Client GetClientByTuple(KeyValuePair<string, string> searchElement) {
+        private Client GetClientByTuple(string searchElement) {
             // получает null, если не найден
             return Clients.GetValueOrDefault(searchElement);
         }
-        private Coach GetCoachByTuple(KeyValuePair<string, string> searchElement) {
+        private Coach GetCoachByTuple(string searchElement) {
             return Coaches.GetValueOrDefault(searchElement);
         }
         private Gym GetGymByNumber(int number) {
@@ -270,10 +270,10 @@ namespace FitnessCenterConsole.DAL {
 
         // удаление сущностей
         public bool DeleteCoach(string surname, string phoneNumber) {
-            KeyValuePair<string, string> temp = new KeyValuePair<string, string>(surname, phoneNumber);
+            string temp = new string(surname + '_' + phoneNumber);
             try { 
                 if (!Coaches.Remove(temp)) {
-                    throw new WrongValueException($"Ошибка: тренера {temp.Key} не найдено в базе.");
+                    throw new WrongValueException($"Ошибка: тренера {temp.Split('_')[0]} не найдено в базе.");
                 } 
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
@@ -284,11 +284,11 @@ namespace FitnessCenterConsole.DAL {
         }
 
         public bool DeleteClient(string surname, string phoneNumber) {
-            KeyValuePair<string, string> temp = new KeyValuePair<string, string>(surname, phoneNumber);
+            string temp = new string(surname + '_' + phoneNumber);
             bool client = Clients.ContainsKey(temp);
             try { 
                 if (!Clients.Remove(temp)) {
-                    throw new WrongValueException($"Ошибка: клиента {temp.Key} не найдено в базе.");
+                    throw new WrongValueException($"Ошибка: клиента {temp.Split('_')[0]} не найдено в базе.");
                 } 
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
@@ -312,7 +312,7 @@ namespace FitnessCenterConsole.DAL {
 
         // поиск по дате и времени для клиента/тренера, занятость зала
         public string FindTrainingCoach(string surname, string phoneNumber, DateTime dateTime) {
-            KeyValuePair<string, string> searchElement = new KeyValuePair<string, string>(surname, phoneNumber);
+            string searchElement = new string(surname + '_' + phoneNumber);
             Schedule.Training training = Schedule.GetTrainingCoach(searchElement, dateTime);
             if (training != null) {
                 return training.stringForCoach();                    
@@ -320,7 +320,7 @@ namespace FitnessCenterConsole.DAL {
             return "Таких записей нет.";
         }
         public string FindTrainingClient(string surname, string phoneNumber, DateTime dateTime) {
-            KeyValuePair<string, string> searchElement = new KeyValuePair<string, string>(surname, phoneNumber);
+            string searchElement = new string(surname + '_' + phoneNumber);
             Schedule.Training training = Schedule.GetTrainingClient(searchElement, dateTime);
             if (training != null) {
                 return training.stringForClient();
