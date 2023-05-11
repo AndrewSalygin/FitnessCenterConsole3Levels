@@ -75,17 +75,17 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<string> clients = new HashSet<string>();
-            clients.Add(new string("Борисова_74444444444"));
-            clients.Add(new string("Борисова222_74444444444"));
-            clients.Add(new string("Черных_74444444442"));
+            HashSet<SearchElement> clients = new HashSet<SearchElement>();
+            clients.Add(new SearchElement("Борисова", "74444444444"));
+            clients.Add(new SearchElement("Борисова222", "74444444444"));
+            clients.Add(new SearchElement("Черных", "74444444443"));
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove("Борисова222_74444444444");
+            clients.Remove(new SearchElement("Борисова222", "74444444444"));
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new string("Борисова_74444444444"));            
+            clients.Remove(new SearchElement("Борисова", "74444444444"));            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
@@ -98,9 +98,8 @@ namespace FitnessCenterConsole.ConsolePL {
 
             // сохранение файла
             using (FileStream fs = new FileStream("database_new.json", FileMode.Create)) {
-                System.Text.Json.JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
+                    JsonSerializer.SerializeAsync<Database>(fs, database);
             }
-
         }
     }
 }
