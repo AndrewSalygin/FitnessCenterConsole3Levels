@@ -9,16 +9,16 @@ namespace FitnessCenterConsole.Entities {
         public class Training : IComparable<Training> {
             private DateTime _dateTime;
             private int _gymKey;
-            private SearchElement _coachKey;
-            private HashSet<SearchElement> _clientKeys;
+            private Tuple<string, string> _coachKey;
+            private HashSet<Tuple<string, string>> _clientKeys;
             private int _countOfClients;
 
             [JsonConstructor]
-            public Training(int gymKey, DateTime dateTime, SearchElement coachKey = null, HashSet<SearchElement> clientKeys = null) {
+            public Training(int gymKey, DateTime dateTime, Tuple<string, string> coachKey = null, HashSet<Tuple<string, string>> clientKeys = null) {
                 DateTime = dateTime;
                 GymKey = gymKey;
                 if (coachKey == null) {
-                    CoachKey = new SearchElement("отсутствует", "отсутствует");
+                    CoachKey = new Tuple<string, string>("отсутствует", "отсутствует");
                 } else {
                     CoachKey = coachKey;
                 }
@@ -30,7 +30,7 @@ namespace FitnessCenterConsole.Entities {
                         CountOfClients = clientKeys.Count();
                     ClientKeys = clientKeys;
                 } else {
-                    ClientKeys = new HashSet<SearchElement>();
+                    ClientKeys = new HashSet<Tuple<string, string>>();
                 }
             }
 
@@ -38,12 +38,12 @@ namespace FitnessCenterConsole.Entities {
                 string result = "\n--------------------\n" +
                                 $"Дата: {DateTime.ToShortDateString()} \n" +
                                 $"Время: {DateTime.ToLongTimeString()} \n" +
-                                $"Тренер: {CoachKey}\n" +
+                                $"Тренер: {CoachKey.Item1}\n" +
                                 $"Номер зала: {GymKey} \n" +
                                 $"Количество клиентов: {CountOfClients} \n\n" +
                                 $"Клиенты: \n";
-                foreach (SearchElement client in ClientKeys) {
-                    result += $"{client} \n";
+                foreach (Tuple<string, string> client in ClientKeys) {
+                    result += $"{client.Item1} \n";
                 }
                 result += "--------------------\n\n";
                 return result;
@@ -54,7 +54,7 @@ namespace FitnessCenterConsole.Entities {
                                 $"Дата: {DateTime.ToShortDateString()} \n" +
                                 $"Время: {DateTime.ToLongTimeString()} \n" +
                                 $"Номер зала: {GymKey} \n" +
-                                $"Тренер: {CoachKey} \n";
+                                $"Тренер: {CoachKey.Item1} \n";
                 result += "--------------------\n\n";
                 return result;
             }
@@ -66,8 +66,8 @@ namespace FitnessCenterConsole.Entities {
                                 $"Номер зала: {GymKey} \n" +
                                 $"Количество клиентов: {CountOfClients} \n\n" +
                                 $"Клиенты: \n";
-                foreach (SearchElement client in ClientKeys) {
-                    result += $"{client} \n";
+                foreach (Tuple<string, string> client in ClientKeys) {
+                    result += $"{client.Item1} \n";
                 }
                 result += "--------------------\n\n";
                 return result;
@@ -79,8 +79,8 @@ namespace FitnessCenterConsole.Entities {
 
             public DateTime DateTime { get => _dateTime; set => _dateTime = value; }
             public int GymKey { get => _gymKey; set => _gymKey = value; }
-            public SearchElement CoachKey { get => _coachKey; set => _coachKey = value; }
-            public HashSet<SearchElement> ClientKeys { get => _clientKeys; set => _clientKeys = value; }
+            public Tuple<string, string> CoachKey { get => _coachKey; set => _coachKey = value; }
+            public HashSet<Tuple<string, string>> ClientKeys { get => _clientKeys; set => _clientKeys = value; }
             public int CountOfClients { get => _countOfClients; set => _countOfClients = value; }
         }
 
@@ -136,7 +136,7 @@ namespace FitnessCenterConsole.Entities {
             Console.WriteLine(text);
         }
         
-        internal bool AddTraining(int gymKey, SearchElement coachKey, HashSet<SearchElement> clientKeys, DateTime dateTime) {
+        internal bool AddTraining(int gymKey, Tuple<string, string> coachKey, HashSet<Tuple<string, string>> clientKeys, DateTime dateTime) {
             Training temp;
             DateTime largeBorderTime = dateTime.AddHours(1);
             DateTime smallerBorderTime;
@@ -151,15 +151,15 @@ namespace FitnessCenterConsole.Entities {
             try {
                 foreach (Training training in Trainings) {
                     if (smallerBorderTime < training.DateTime && training.DateTime < largeBorderTime) {
-                        if (training.CoachKey == coachKey) {
-                            throw new WrongValueException($"Ошибка: тренер {coachKey} уже проводит тренеровку в данное время.");
+                        if (training.CoachKey.Item2 == coachKey.Item2) {
+                            throw new WrongValueException($"Ошибка: тренер {coachKey.Item1} уже проводит тренеровку в данное время.");
                         }
                         if (gymKey == training.GymKey) {
                             throw new WrongValueException($"Ошибка: зал номер {gymKey} уже занят в данное время.");
                         }
-                        foreach (SearchElement client in clientKeys) {
+                        foreach (Tuple<string, string> client in clientKeys) {
                             if (training.ClientKeys.Contains(client)) {
-                                throw new WrongValueException($"Ошибка: клиент {client} уже записан на другую тренировку в это время.");
+                                throw new WrongValueException($"Ошибка: клиент {client.Item1} уже записан на другую тренировку в это время.");
                             }
                         }
                     }
@@ -174,7 +174,7 @@ namespace FitnessCenterConsole.Entities {
             return true;
         }
 
-        internal bool AddTraining(int gymKey, SearchElement coachKey, DateTime dateTime) {
+        internal bool AddTraining(int gymKey, Tuple<string, string> coachKey, DateTime dateTime) {
             Training temp;
             DateTime largeBorderTime = dateTime.AddHours(1);
             DateTime smallerBorderTime;
@@ -189,8 +189,8 @@ namespace FitnessCenterConsole.Entities {
             try {
                 foreach (Training training in Trainings) {
                     if (smallerBorderTime < training.DateTime && training.DateTime < largeBorderTime) {
-                        if (training.CoachKey == coachKey) {
-                            throw new WrongValueException($"Ошибка: тренер {coachKey} уже проводит тренеровку в данное время.");
+                        if (training.CoachKey.Item2 == coachKey.Item2) {
+                            throw new WrongValueException($"Ошибка: тренер {coachKey.Item1} уже проводит тренеровку в данное время.");
                         }
                         if (gymKey == training.GymKey) {
                             throw new WrongValueException($"Ошибка: зал номер {gymKey} уже занят в данное время.");
@@ -247,16 +247,16 @@ namespace FitnessCenterConsole.Entities {
             return true;
         }
 
-        internal Training GetTrainingCoach(SearchElement searchElement, DateTime dateTime) {
+        internal Training GetTrainingCoach(Tuple<string, string> searchElement, DateTime dateTime) {
             return Trainings.FirstOrDefault(x => x.CoachKey.Equals(searchElement) &&
                                             x.DateTime <= dateTime &&
                                             x.DateTime.AddHours(1) >= dateTime);
         }
 
-        internal Training GetTrainingClient(SearchElement searchElement, DateTime dateTime) {
+        internal Training GetTrainingClient(Tuple<string, string> searchElement, DateTime dateTime) {
             foreach (Training training in Trainings) {
-                foreach (SearchElement client in training.ClientKeys) {
-                    if (searchElement == client &&
+                foreach (Tuple<string, string> client in training.ClientKeys) {
+                    if (searchElement.Item2 == client.Item2 &&
                         dateTime >= training.DateTime &&
                         dateTime <= training.DateTime.AddHours(1)) {
                         return training;
@@ -280,7 +280,7 @@ namespace FitnessCenterConsole.Entities {
             if (client != null) {
                 SortedSet<Training> trainings = new SortedSet<Training>();
                 foreach (Training training in Trainings) {
-                    if (training.ClientKeys.Contains(new SearchElement(client.Surname, client.PhoneNumber))) {
+                    if (training.ClientKeys.Contains(new Tuple<string, string>(client.Surname, client.PhoneNumber))) {
                         trainings.Add(training);
                     }
                 }
@@ -308,7 +308,7 @@ namespace FitnessCenterConsole.Entities {
             if (coach != null) {
                 SortedSet<Training> trainings = new SortedSet<Training>();
                 foreach (Training training in Trainings) {
-                    if (training.CoachKey == new SearchElement(coach.Surname, coach.PhoneNumber)) {
+                    if (training.CoachKey.Item2 == coach.PhoneNumber) {
                         trainings.Add(training);
                     }
                 }
