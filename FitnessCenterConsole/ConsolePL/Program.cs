@@ -71,30 +71,32 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<SearchElement> clients = new HashSet<SearchElement>();
-            clients.Add(new SearchElement("Борисова", "74444444444"));
-            clients.Add(new SearchElement("Борисова222", "74444444444"));
-            clients.Add(new SearchElement("Черных", "74444444443"));
+            HashSet<Tuple<string, string>> clients = new HashSet<Tuple<string, string>>();
+            clients.Add(new Tuple<string, string>("Борисова", "74444444444"));
+            clients.Add(new Tuple<string, string>("Борисова222", "74444444444"));
+            clients.Add(new Tuple<string, string>("Черных", "74444444442"));
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new SearchElement("Борисова222", "74444444444"));
+            clients.Remove(new Tuple<string, string>("Борисова222", "74444444444"));
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new SearchElement("Борисова", "74444444444"));            
+            clients.Remove(new Tuple<string, string>("Борисова", "74444444444"));            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
             Console.WriteLine(database.GetInfoCoach("Кулаков", "74444444448"));
-            Console.WriteLine(database.FindTrainingClient("Черных", "74444444443", time1));
+            Console.WriteLine(database.GetInfoClient("Черных", "74444444442"));
+            Console.WriteLine(database.FindTrainingClient("Черных", "74444444442", time1));
             database.DeleteTraining(12, time2);
-            database.DeleteClientFromTraining("Черных", "74444444443", "Кулаков", "74444444448", time1);
+            database.DeleteClientFromTraining("Черных", "74444444442", "Кулаков", "74444444448", time1);
             Console.WriteLine(database.FindTrainingClient("Черных", "74444444443", time1));
 
             // сохранение файла
-            using (FileStream fs = new FileStream("database_new.json", FileMode.Create)) {
-                    JsonSerializer.SerializeAsync<Database>(fs, database);
+            using (FileStream fs = new FileStream("database_new.json", FileMode.OpenOrCreate)) {
+                    JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
             }
+        
         }
     }
 }
