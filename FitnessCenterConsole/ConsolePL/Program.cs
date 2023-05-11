@@ -9,7 +9,7 @@ using System.ComponentModel;
 using Nancy.Json.Converters;
 
 namespace FitnessCenterConsole.ConsolePL {
-    class Program {
+    class Program { 
         static void Main() {
             Console.WriteLine("1.Создать новую базу\n2.Открыть существующую базу");
             int choice = Int32.Parse(Console.ReadLine());
