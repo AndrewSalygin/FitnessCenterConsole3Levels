@@ -4,6 +4,9 @@ using System.IO;
 using System.Text.Json;
 using FitnessCenterConsole.Entities;
 using FitnessCenterConsole.DAL;
+using Newtonsoft.Json;
+using System.ComponentModel;
+using Nancy.Json.Converters;
 
 namespace FitnessCenterConsole.ConsolePL {
     class Program {
@@ -71,17 +74,17 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<Tuple<string, string>> clients = new HashSet<Tuple<string, string>>();
-            clients.Add(new Tuple<string, string>("Борисова", "74444444444"));
-            clients.Add(new Tuple<string, string>("Борисова222", "74444444444"));
-            clients.Add(new Tuple<string, string>("Черных", "74444444442"));
+            HashSet<KeyValuePair<string, string>> clients = new HashSet<KeyValuePair<string, string>>();
+            clients.Add(new KeyValuePair<string, string>("Борисова", "74444444444"));
+            clients.Add(new KeyValuePair<string, string>("Борисова222", "74444444444"));
+            clients.Add(new KeyValuePair<string, string>("Черных", "74444444442"));
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова222", "74444444444"));
+            clients.Remove(new KeyValuePair<string, string>("Борисова222", "74444444444"));
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова", "74444444444"));            
+            clients.Remove(new KeyValuePair<string, string>("Борисова", "74444444444"));            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
@@ -94,7 +97,10 @@ namespace FitnessCenterConsole.ConsolePL {
 
             // сохранение файла
             using (FileStream fs = new FileStream("database_new.json", FileMode.OpenOrCreate)) {
-                    JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
+                TypeDescriptor.AddAttributes(typeof((string, string)), new TypeConverterAttribute(typeof(KeyValuePair<string, string>)));
+                var json = JsonConvert.SerializeObject(database);
+                JsonConvert.DeserializeObject<Database>(json);
+                //        JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
             }
         
         }
