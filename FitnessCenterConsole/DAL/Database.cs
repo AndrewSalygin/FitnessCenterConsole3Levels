@@ -6,8 +6,8 @@ using FitnessCenterConsole.Entities;
 
 namespace FitnessCenterConsole.DAL {
     internal class Database : IDatabase {
-        private Dictionary<Tuple<string, string>, Coach> _coaches;
-        private Dictionary<Tuple<string, string>, Client> _clients;
+        private Dictionary<KeyValuePair<string, string>, Coach> _coaches;
+        private Dictionary<KeyValuePair<string, string>, Client> _clients;
         private Dictionary<int, Gym> _gyms;
         private Schedule _schedule;
 
