@@ -71,17 +71,17 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<Tuple<string, string>> clients = new HashSet<Tuple<string, string>>();
-            clients.Add(new Tuple<string, string>("Борисова", "74444444444"));
-            clients.Add(new Tuple<string, string>("Борисова222", "74444444444"));
-            clients.Add(new Tuple<string, string>("Черных", "74444444442"));
+            HashSet<KeyValuePair<string, string>> clients = new HashSet<KeyValuePair<string, string>>();
+            clients.Add(new KeyValuePair<string, string>("Борисова", "74444444444"));
+            clients.Add(new KeyValuePair<string, string>("Борисова222", "74444444444"));
+            clients.Add(new KeyValuePair<string, string>("Черных", "74444444442"));
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова222", "74444444444"));
+            clients.Remove(new KeyValuePair<string, string>("Борисова222", "74444444444"));
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова", "74444444444"));            
+            clients.Remove(new KeyValuePair<string, string>("Борисова", "74444444444"));            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
