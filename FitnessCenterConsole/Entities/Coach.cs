@@ -59,7 +59,7 @@ namespace FitnessCenterConsole.Entities {
                    $"Фамилия: {Surname} \n" +
                    $"Имя: {Name} \n" +
                    $"Отчество: {MiddleName} \n" +
-                   $"Дата рождения: {Birthday.Date} \n" +
+                   $"Дата рождения: {Birthday.ToShortDateString()} \n" +
                    $"Образование: {educationToRussianLanguage(Education)} \n" +
                    $"Опыт: {Experience} \n" +
                    $"Номер телефона: {PhoneNumber} \n"; 

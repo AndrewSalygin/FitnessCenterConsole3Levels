@@ -14,7 +14,7 @@ namespace FitnessCenterConsole.DAL {
         public bool DeleteClientFromTraining(string surnameClient, string phoneNumberClient,
             string surnameCoach, string phoneNumberCoach, DateTime dateTime);
         public bool AddNewTraining(int gymKey, string surnameCoach, string phoneNumberCoach, 
-            HashSet<SearchElement> clientKeys, DateTime dateTime);
+            HashSet<Tuple<string, string>> clientKeys, DateTime dateTime);
         public bool AddNewTraining(int gymKey, string surnameCoach, 
             string phoneNumberCoach, DateTime dateTime);
         public bool DeleteTraining(int gymKey, DateTime dateTime);
