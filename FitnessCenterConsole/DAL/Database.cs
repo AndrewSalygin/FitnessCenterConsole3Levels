@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FitnessCenterConsole.BLL;
 using FitnessCenterConsole.Common;
 using FitnessCenterConsole.ConsolePL;
 using FitnessCenterConsole.Entities;
