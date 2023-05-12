@@ -3,25 +3,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using FitnessCenterConsole.Entities;
-using FitnessCenterConsole.DAL;
+using FitnessCenterConsole.BLL;
+using FitnessCenterConsole.Common;
 
 namespace FitnessCenterConsole.ConsolePL {
     class Program {
         static void Main() {
             Console.WriteLine("1.Создать новую базу\n2.Открыть существующую базу");
             int choice = Int32.Parse(Console.ReadLine());
-            Database database = null;
+            IProgramLogic database;
 
             try {
                 switch (choice) {
                     case 1:
-                        database = new Database();
+                        database = DependencyResolver.ProgramLogic;
                         break;
                     case 2:
                         Console.Write("Введите имя файла: ");
                         string file = Console.ReadLine();
                         try {
-                            database = JsonFileReader.Read<Database>($"{file}.json");
+                            database = DependencyResolver.setParameters(file);
                         } catch (FileNotFoundException ex) {
                             Console.WriteLine("Ошибка: Файл не найден.");
                             return;
@@ -72,17 +73,17 @@ namespace FitnessCenterConsole.ConsolePL {
             database.AddClientToTraining("Борисова", "74444444444", "Кулаков", "74444444448", time1);
             
 
-            HashSet<Tuple<string, string>> clients = new HashSet<Tuple<string, string>>();
-            clients.Add(new Tuple<string, string>("Борисова", "74444444444"));
-            clients.Add(new Tuple<string, string>("Борисова222", "74444444444"));
-            clients.Add(new Tuple<string, string>("Черных", "74444444442"));
+            HashSet<string> clients = new HashSet<string>();
+            clients.Add("Борисова_74444444444");
+            clients.Add("Борисова222_74444444444");
+            clients.Add("Черных_74444444442");
 
             DateTime time2 = DateTime.Now.AddDays(1).AddMinutes(20);
 
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова222", "74444444444"));
+            clients.Remove("Борисова222_74444444444");
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
-            clients.Remove(new Tuple<string, string>("Борисова", "74444444444"));            
+            clients.Remove("Борисова_74444444444");            
             database.AddNewTraining(12, "Воронцова", "74444444449", clients, time2);
             database.AddNewTraining(12, "Воронцова", "74444444449", time2);
 
@@ -94,10 +95,7 @@ namespace FitnessCenterConsole.ConsolePL {
             Console.WriteLine(database.FindTrainingClient("Черных", "74444444443", time1));
 
             // сохранение файла
-            using (FileStream fs = new FileStream("database_new.json", FileMode.OpenOrCreate)) {
-                    JsonSerializer.SerializeAsync<Database>(fs, database).Wait();
-            }
-        
+            database.saveDatabase("database_new");
         }
     }
 }
