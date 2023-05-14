@@ -63,7 +63,7 @@ namespace FitnessCenterConsole.DAL {
             Education education, DateTime birthday, string phoneNumber) {
             Coach temp;
             try {
-                temp = new Coach(Coaches.Count, surname, name, middleName, experience, education, birthday,
+                temp = new Coach(surname, name, middleName, experience, education, birthday,
                     phoneNumber);
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
@@ -84,7 +84,7 @@ namespace FitnessCenterConsole.DAL {
             string phoneNumber) {
             Client temp;
             try {
-                temp = new Client(Clients.Count, surname, name, middleName, birthday, phoneNumber);
+                temp = new Client(surname, name, middleName, birthday, phoneNumber);
             } catch (WrongValueException ex) {
                 PrintToApp(ex.Message);
                 return false;
@@ -204,10 +204,10 @@ namespace FitnessCenterConsole.DAL {
                 // если указанный зал существует
                 if (GetGymByNumber(gymKey) != null) {
                     // если указанный тренер существует
-                    if (GetCoachByTuple(coachKey) != null) {
+                    if (GetCoachByKey(coachKey) != null) {
                         // если все клиенты в базе существуют
                         foreach (string client in clientKeys) {
-                            if (GetClientByTuple(client) == null) {
+                            if (GetClientByKey(client) == null) {
                                 throw new WrongValueException(
                                     $"Ошибка: клиент {client.Split('_')[0]} не найден в базе.");
                             }
@@ -230,7 +230,7 @@ namespace FitnessCenterConsole.DAL {
             string coachKey = new string(surnameCoach + '_' + phoneNumberCoach);
             try {
                 if (GetGymByNumber(gymKey) != null) {
-                    if (GetCoachByTuple(coachKey) != null) {
+                    if (GetCoachByKey(coachKey) != null) {
                         return Schedule.AddTraining(gymKey, coachKey, dateTime);
                     }
 
@@ -269,7 +269,7 @@ namespace FitnessCenterConsole.DAL {
         // вывод полной информации о сущностях с актуальным
         public string GetInfoCoach(string surname, string phoneNumber) {
             string searchElement = new string(surname + '_' + phoneNumber);
-            Coach temp = GetCoachByTuple(searchElement);
+            Coach temp = GetCoachByKey(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null
                 ? "\nНайдено:" +
@@ -292,7 +292,7 @@ namespace FitnessCenterConsole.DAL {
 
         public string GetInfoClient(string surname, string phoneNumber) {
             string searchElement = new string(surname + '_' + phoneNumber);
-            Client temp = GetClientByTuple(searchElement);
+            Client temp = GetClientByKey(searchElement);
             Schedule localSchedule = new Schedule(Schedule.GetInfo(temp));
             return temp != null
                 ? "\nНайдено:" +
@@ -303,12 +303,12 @@ namespace FitnessCenterConsole.DAL {
         }
 
         // получение экземпляра класса
-        private Client GetClientByTuple(string searchElement) {
+        private Client GetClientByKey(string searchElement) {
             // получает null, если не найден
             return Clients.GetValueOrDefault(searchElement);
         }
 
-        private Coach GetCoachByTuple(string searchElement) {
+        private Coach GetCoachByKey(string searchElement) {
             return Coaches.GetValueOrDefault(searchElement);
         }
 
@@ -387,6 +387,57 @@ namespace FitnessCenterConsole.DAL {
             }
 
             return "Таких записей нет.";
+        }
+
+        public void clearSchedule() {
+            Schedule = new Schedule();
+        }
+
+        private List<Client> GetClientsBySurname(string surname) {
+            List<Client> clients = new List<Client>();
+            
+            foreach (var client in Clients) {
+                if (client.Key.Split('_')[0] == surname) {
+                    clients.Add(client.Value);
+                }
+            }
+            
+            return clients;
+        }
+
+        private List<Coach> GetCoachesBySurname(string surname) {
+            List<Coach> coaches = new List<Coach>();
+
+            foreach (var coach in Coaches) {
+                if (coach.Key.Split('_')[0] == surname) {
+                    coaches.Add(coach.Value);
+                }
+            }
+            
+            return coaches;
+        }
+
+        public string FindCoachesBySurname(string surname) {
+            List<Coach> coaches = GetCoachesBySurname(surname);
+            string result = $"Найденные тренеры с фамилией {surname}:\n" +
+                            "----------------------------\n";
+
+            foreach (Coach coach in coaches) {
+                result += coach.Name + ' ' + coach.MiddleName + ' ' + coach.PhoneNumber;
+            } 
+            
+            return result;
+        }
+        public string FindClientsBySurname(string surname) {
+            List<Client> clients = GetClientsBySurname(surname);
+            string result = $"Найденные клиенты с фамилией {surname}:\n" +
+                            "----------------------------\n";
+
+            foreach (Client client in clients) {
+                result += client.Name + ' ' + client.MiddleName + ' ' + client.PhoneNumber + '\n';
+            }
+
+            return result;
         }
 
         public void saveDatabase(string file) {

@@ -27,7 +27,10 @@ namespace FitnessCenterConsole.DAL {
         public string FindTrainingCoach(string surname, string phoneNumber, DateTime dateTime);
         public string FindTrainingClient(string surname, string phoneNumber, DateTime dateTime);
         public string FindTrainingGym(int numberOfGym, DateTime dateTime);
-        bool AddNewTraining(int gymKey, DateTime surnameCoach);
+        public bool AddNewTraining(int gymKey, DateTime surnameCoach);
+        public void clearSchedule();
+        public string FindCoachesBySurname(string surname);
+        public string FindClientsBySurname(string surname);
         public void saveDatabase(string file);
         public IDatabase setDatabase(string file);
     }

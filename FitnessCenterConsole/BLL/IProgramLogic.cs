@@ -35,6 +35,10 @@ namespace FitnessCenterConsole.BLL
         public string FindTrainingCoach(string surname, string phoneNumber, DateTime dateTime);
         public string FindTrainingClient(string surname, string phoneNumber, DateTime dateTime);
         public string FindTrainingGym(int numberOfGym, DateTime dateTime);
+        public void clearSchedule();
+        public string FindCoachesBySurname(string surname);
+        public string FindClientsBySurname(string surname);
         public void saveDatabase(string file);
+        public void setDatabase(string file);
         }
 }

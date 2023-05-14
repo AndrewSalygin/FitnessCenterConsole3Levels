@@ -94,6 +94,16 @@ namespace FitnessCenterConsole.BLL
         public string FindTrainingGym(int numberOfGym, DateTime dateTime) {
             return Database.FindTrainingGym(numberOfGym, dateTime);
         }
+        public void clearSchedule() {
+            Database.clearSchedule();
+        }
+
+        public string FindCoachesBySurname(string surname) {
+            return Database.FindCoachesBySurname(surname);
+        }
+        public string FindClientsBySurname(string surname) {
+            return Database.FindClientsBySurname(surname);
+        }
         public void saveDatabase(string file) {
             Database.saveDatabase(file);
         }

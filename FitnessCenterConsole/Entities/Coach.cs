@@ -10,6 +10,8 @@ namespace FitnessCenterConsole.Entities {
         Higher
     };
     public class Coach {
+        private static int _idGlobal = 0;
+
         private int _id;
         private string _surname;
         private string _name;
@@ -20,9 +22,10 @@ namespace FitnessCenterConsole.Entities {
         private string _phoneNumber;
 
         [JsonConstructor]
-        public Coach(int id, string surname, string name, string middleName, int experience, 
+        public Coach(string surname, string name, string middleName, int experience, 
             Education education, DateTime birthday, string phoneNumber) {
-            Id = id;
+            Id = IdGlobal;
+            IdGlobal++;
             Surname = surname;
             Name = name;
             MiddleName = middleName;
@@ -45,6 +48,7 @@ namespace FitnessCenterConsole.Entities {
         }
 
         // свойства
+        public static int IdGlobal { get => _idGlobal; set => _idGlobal = value; }
         public int Id { get => _id; set => _id = value; }
         public string PhoneNumber { get => _phoneNumber; set => _phoneNumber = value; }
         public int Experience { get => _experience; set => _experience = value; }

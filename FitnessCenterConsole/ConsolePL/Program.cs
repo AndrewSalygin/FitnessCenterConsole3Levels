@@ -10,7 +10,15 @@ namespace FitnessCenterConsole.ConsolePL {
     class Program { 
         static void Main() {
             Console.WriteLine("1.Создать новую базу\n2.Открыть существующую базу");
-            int choice = Int32.Parse(Console.ReadLine());
+            int choice;
+            try {
+                choice = Int32.Parse(Console.ReadLine());
+            }
+            catch (Exception ex) {
+                Console.WriteLine("Ошибка: Неправильный выбор пункта.");
+                return;
+            }
+            
             IProgramLogic database;
 
             try {
@@ -94,6 +102,10 @@ namespace FitnessCenterConsole.ConsolePL {
             database.DeleteClientFromTraining("Черных", "74444444442", "Кулаков", "74444444448", time1);
             Console.WriteLine(database.FindTrainingClient("Черных", "74444444443", time1));
 
+            database.AddNewClient("Черных", "Олег", "Максимович", new DateTime(1991, 6, 2), "75432146342");
+            Console.WriteLine(database.FindClientsBySurname("Черных"));
+
+            database.clearSchedule();
             // сохранение файла
             database.saveDatabase("database_new");
         }
